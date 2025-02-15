@@ -5,25 +5,21 @@ input_str = None
 if len(sys.argv) > 1:
     input_str = sys.argv[1]
 
-if input_str is None:
+if not input_str:
     input_str = input("Input a string: ")
 
-result: str = ''
+result: list = list()
 
-current_char = None
+current_char = input_str[0]
 counter: int = 0
 for char in input_str:
-    if not current_char:
-        current_char = char
-        counter = 1
+    if current_char == char:
+        counter += 1
     else:
-        if current_char == char:
-            counter += 1
-        else:
-            result += f"{counter}{current_char}"
-            counter = 1
-            current_char = char
+        result.append( f"{counter}{current_char}")
+        counter = 1
+        current_char = char
 else:
-    result += f"{counter}{current_char}"
+    result.append(f"{counter}{current_char}")
 
-print(result)
+print("".join(result))
