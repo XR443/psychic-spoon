@@ -69,27 +69,31 @@ def print_db(db: dict, column_length: int = 15):
         print(f"{user_id_str}|{user_surname}|{user_name}|{user_age}")
 
 
-mock_db: dict = dict()
+def get_table_data() -> dict:
+    mock_db: dict = dict()
 
-while True:
-    print("Ввод пользователя")
+    while True:
+        print("Ввод пользователя")
 
-    input_name: str = get_capitalize_value_or_empty_string("Input user name: ")
-    if not input_name:
-        break
+        input_name: str = get_capitalize_value_or_empty_string("Input user name: ")
+        if not input_name:
+            break
 
-    input_surname: str = get_capitalize_value_or_empty_string("Input user surname: ")
-    if not input_surname:
-        break
+        input_surname: str = get_capitalize_value_or_empty_string("Input user surname: ")
+        if not input_surname:
+            break
 
-    input_age: str = get_numeric_or_empty_string("Input user age: ", min=18, max=60)
-    if not input_age:
-        break
+        input_age: str = get_numeric_or_empty_string("Input user age: ", min=18, max=60)
+        if not input_age:
+            break
 
-    input_id: str = get_numeric_or_empty_string("Input user id: ", target_length=8)
-    if not input_id:
-        break
+        input_id: str = get_numeric_or_empty_string("Input user id: ", target_length=8)
+        if not input_id:
+            break
 
-    mock_db[input_id] = {"name": input_name, "surname": input_surname, "age": input_age}
-
-print_db(mock_db)
+        if input_id in mock_db:
+            print(f"Person with {input_id} already in db")
+        else:
+            mock_db[input_id] = {"name": input_name, "surname": input_surname, "age": input_age}
+    
+    return mock_db

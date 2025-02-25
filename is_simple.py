@@ -32,13 +32,3 @@ def is_simple(number: int) -> bool:
     else:
         return False
 
-
-input_number = None
-
-if len(sys.argv) > 1:
-    input_number = int(sys.argv[1])
-
-if not input_number:
-    input_number = int(input("Input number: "))
-
-print(is_simple(input_number))

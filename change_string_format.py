@@ -97,17 +97,3 @@ def reformat(input_str: str, target_format: str = "reversed") -> str:
         return reversed_format(input_str)
 
 
-input_str = None
-format_to = None
-
-if len(sys.argv) > 2:
-    input_str = sys.argv[1]
-    format_to = sys.argv[2]
-elif len(sys.argv) > 1:
-    input_str = sys.argv[1]
-
-if not input_str:
-    input_str = input("Input string in camelCase or snake_case: ")
-    format_to = input("Input target format: ")
-
-print(reformat(input_str, format_to))

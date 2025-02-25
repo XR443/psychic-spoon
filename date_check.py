@@ -44,14 +44,3 @@ def validate_date(str_date: str) -> bool:
             return False
     else:
         return True
-
-
-input_str = None
-
-if len(sys.argv) > 1:
-    input_str = sys.argv[1]
-
-if not input_str:
-    input_str = input("Input date with in format 'dd.mm.yyyy': ")
-
-print(validate_date(input_str))
