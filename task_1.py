@@ -1,19 +1,8 @@
-number: int = int(input("Введите число: "))
+n: int = int(input("Введите число: "))
 
-positivity = ""
-parity = ""
+count = 0
+for _ in range(n):
+    if not int(input("Введите число: ")):
+        count += 1
 
-if number % 2:
-    parity = "нечетное"
-else:
-    parity = "четное"
-
-if number == 0:
-    positivity = ""
-    parity = "нулевое"
-elif number<0:
-    positivity = "отрицательное"
-else:
-    positivity = "положительное"
-
-print(f"{positivity} {parity} число".strip())
+print(f"{count} чисел не равно нулю".strip())

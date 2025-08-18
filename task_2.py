@@ -1,11 +1,11 @@
-vowels = {'a': 0, 'e': 0, 'i': 0, 'o': 0, 'u': 0}
-consonants = 0
+n: int = int(input("Введите число: "))
 
-for char in input("Введите слово: "):
-    if char in vowels:
-        vowels[char] += 1
-    else:
-        consonants += 1
+if n<=0:
+    raise ValueError("Число должно быть натуральным")
 
-print(not any([not val for key, val in vowels.items()]))
+count = 1
+for x in range(1, n):
+    if not n % x:
+        count += 1
 
+print(f"Существует {count} делителей числа {n}".strip())
