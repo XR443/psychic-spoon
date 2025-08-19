@@ -1,9 +1,5 @@
 n: int = int(input("Введите число: "))
 
-nums = []
+nums = {int(x) for x in input("Введите числа: ").strip().split(' ')}
 
-for _ in range(n):
-    num: int = int(input("Введите число: "))
-    nums.append(num)
-
-print([x for x in reversed(nums)])
+print(len(nums))
