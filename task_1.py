@@ -1,8 +1,9 @@
-original_string: str = input("Введите слово: ")
+n: int = int(input("Введите число: "))
 
-reversed_string = original_string[::-1]
+nums = []
 
-if original_string == reversed_string:
-    print("yes")
-else:
-    print("no")
+for _ in range(n):
+    num: int = int(input("Введите число: "))
+    nums.append(num)
+
+print([x for x in reversed(nums)])
