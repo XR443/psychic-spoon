@@ -1,4 +1,2 @@
-nums_1 = {int(x) for x in input("Введите числа: ").strip().split(' ')}
-nums_2 = {int(x) for x in input("Введите числа: ").strip().split(' ')}
-
-print(len(nums_1 & nums_2))
+num_dict = {x: x**x for x in range(10, -6, -1)}
+print(num_dict)
