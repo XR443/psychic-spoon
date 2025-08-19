@@ -1,11 +1,5 @@
-n: int = int(input("Введите число: "))
+import re
 
-if n<=0:
-    raise ValueError("Число должно быть натуральным")
+original_string: str = input("Введите слово: ")
 
-count = 1
-for x in range(1, n):
-    if not n % x:
-        count += 1
-
-print(f"Существует {count} делителей числа {n}".strip())
+print(re.sub(r' +', ' ', original_string))

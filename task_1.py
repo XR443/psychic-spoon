@@ -1,8 +1,8 @@
-n: int = int(input("Введите число: "))
+original_string: str = input("Введите слово: ")
 
-count = 0
-for _ in range(n):
-    if not int(input("Введите число: ")):
-        count += 1
+reversed_string = original_string[::-1]
 
-print(f"{count} чисел не равно нулю".strip())
+if original_string == reversed_string:
+    print("yes")
+else:
+    print("no")
