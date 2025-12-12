@@ -8,6 +8,11 @@ scipy==1.15.3
 statsmodels==0.14.4
 scikit-learn==1.7.0
 
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.9.1
+--extra-index-url https://download.pytorch.org/whl/cu130
+torchvision==0.24.1
+
 umap-learn==0.5.9.post2
 
 networkx==3.4.2
@@ -18,3 +23,4 @@ xgboost==3.1.1
 
 tqdm==4.67.1
 kagglehub==0.3.13
+ipywidgets==8.1.8
