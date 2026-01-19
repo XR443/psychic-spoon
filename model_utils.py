@@ -1,12 +1,15 @@
+from pathlib import Path
+
+import cv2
 import numpy as np
+import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 from torch import no_grad, nn
+from cnn_model import build_model_and_optimizer
 
-from regression_model import build_model_and_optimizer
 
-
-def train(X, y, model, optimizer, criterion, need_to_learn=True):
+def train(X, y, model, optimizer, criterion, need_to_learn=True, metric=lambda true, pred: 0):
     """
     Метод 1 прохода обучения модели с backward
 
@@ -23,21 +26,24 @@ def train(X, y, model, optimizer, criterion, need_to_learn=True):
     if need_to_learn:
         outputs = model(X)
         loss = criterion(outputs, y)
-        # loss = criterion(min_max_scale(outputs), y)
 
         # Backpropagation and optimization
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
+        metric_loss = metric(y, outputs)
     else:
         with no_grad():
             outputs = model(X)
             loss = criterion(outputs, y)
+            metric_loss = metric(y, outputs)
 
-    return loss.item()
+    return loss.item(), metric_loss.item()
 
 
-def test_train(X, y, model, optimizer, criterion, num_epochs, batch_size, device):
+def test_train(X, y, model, optimizer, criterion, num_epochs, batch_size, device, need_learn=True,
+               metric=lambda true, pred: 0, ):
     """
     Метод обучения модели по эпохам
 
@@ -49,79 +55,137 @@ def test_train(X, y, model, optimizer, criterion, num_epochs, batch_size, device
     :param num_epochs: количество эпох
     :param batch_size: размер пакета для обучения, если None то используется весь X
     :param device: куда поместить значения
-    :return: None
+    :return: min loss from training
     """
+    avg_loss = None
+    avg_metric_loss = None
+
+    loss_sum = lambda current, new: (current + new) / 2 if current else new
+
     for epoch in range(num_epochs):
         if batch_size:
-            X_batched = X.split(batch_size)
-            y_batched = y.split(batch_size)
+            X_batched = X.split(batch_size).to(device)
+            y_batched = y.split(batch_size).to(device)
             for i in range(len(X_batched)):
-                train(X_batched[i].to(device), y_batched[i].to(device), model, optimizer, criterion)
+                loss, metric_loss = train(X_batched[i], y_batched[i], model, optimizer, criterion, need_learn, metric)
         else:
-            train(X, y, model, optimizer, criterion)
+            loss, metric_loss = train(X, y, model, optimizer, criterion, need_learn, metric)
+        avg_loss = loss_sum(avg_loss, loss)
+        avg_metric_loss = loss_sum(avg_metric_loss, metric_loss)
+    return avg_loss, avg_metric_loss
 
 
-def cross_val(X_train, y_train, X_test, y_test, params, storage, device):
-    """
-    Провод кросс-валидацию с подбором гиперпараметров для обучения.
-
-    :param X_train: x для обучения
-    :param y_train: y для обучения
-    :param X_test: x для проверки
-    :param y_test: y для проверки
-    :param params: параметры создания модели и обучения
-    :param storage: куда сохранять результаты
-    :param device: куда поместить значения
-    :return: минимальную найденную ошибку, лучший набор параметров, который привел к наименьшей ошибке
-    """
-    best_item = None
-    min_loss = float('inf')
-
-    for item in params:
-        model, optimizer = build_model_and_optimizer(item)
-
-        model.to(device)
-
-        X_train = X_train.to(device)
-        y_train = y_train.to(device)
-        X_test = X_test.to(device)
-        y_test = y_test.to(device)
-
-        criterion = nn.MSELoss()
-
-        test_train(X_train, y_train, model, optimizer, criterion, item['num_epochs'], item['batch_size'], device)
-
-        test_loss = train(X_test, y_test, model, optimizer, criterion, need_to_learn=False)
-        if test_loss < min_loss:
-            min_loss = test_loss
-            best_item = item
-
-    storage.put((min_loss, best_item))
-    print(f'Наименьшая ошибка ({min_loss:.4f}) достигнута при параметрах: {best_item}')
-    return min_loss, best_item
+def get_images(folder_path="./dataset/understanding_cloud_organization/train_images/"):
+    images = dict()
+    folder_path = Path(folder_path)
+    for file_path in folder_path.iterdir():
+        image = cv2.imread(str(file_path))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        images[file_path.name] = image
+    return images
 
 
-def generate_data():  # генерируем случайные точки
-    """
-    Генерирует данные для обучения
-    :return: общий тензор, X_train, X_test, X_val, y_train, y_test, y_val
-    """
-    np.random.seed(42)
-    samples = torch.Tensor(np.random.uniform(-10, 10, (20000, 2)))
-    target = torch.Tensor([(x, y, np.sin(x + 2 * y) * np.exp(-(2 * x + y) ** 2)) for x, y in samples])
-    X_train, X_test, y_train, y_test = train_test_split(target[:, :-1], target[:, -1].reshape(-1, 1),
-                                                        test_size=0.3, random_state=42)
-    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=42)
+def get_image(folder_path="./dataset/understanding_cloud_organization/train_images/", image_name=None):
+    if image_name:
+        image = cv2.imread(str(Path(folder_path).joinpath(image_name).absolute()))
+        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    if len(X_train) != len(y_train):
-        raise ValueError("Train data does not have same length as train target")
+    folder_path = Path(folder_path)
+    for file_path in folder_path.iterdir():
+        image = cv2.imread(str(file_path))
+        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    if len(X_test) != len(y_test):
-        raise ValueError("Test data does not have same length as test target")
+    return None
 
-    if len(X_val) != len(y_val):
-        raise ValueError("Val data does not have same length as va; target")
 
-    # sin(x + 2*y)exp(-(2x + y)^2)
+def crop(image, size=512):
+    x_size = image.shape[1]
+    x_full_squares = x_size // size
+    x_overlap = (((x_full_squares + 1) * size) - x_size) // x_full_squares
 
-    return target, X_train, X_test, X_val, y_train, y_test, y_val
+    y_size = image.shape[0]
+    y_full_squares = y_size // size
+    y_overlap = (((y_full_squares + 1) * size) - y_size) // y_full_squares
+
+    results = []
+
+    y = 0
+    while y < y_size:
+        y -= y_overlap if y > 0 else 0
+        x = 0
+        while x < x_size:
+            x -= x_overlap if x > 0 else 0
+
+            image_crop = image[y:y + size, x:x + size]
+            results.append(image_crop)
+
+            x += size
+
+        y += size
+
+    return np.asarray(results), (x_size, x_overlap, size), (y_size, y_overlap, size)
+
+
+def get_edge(image, threshold1, threshold2):
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    edge_image = cv2.Canny(gray_image, threshold1, threshold2)
+    return edge_image
+
+
+def get_gray_color_image(image, threshold=None):
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    if threshold:
+        gray_image[gray_image >= threshold] = 255
+        gray_image[gray_image < threshold] = 0
+    return gray_image
+
+
+def rle_decode(encoded_pixels, mask_val=1, shape=(1400, 2100)):
+    if pd.isna(encoded_pixels):
+        return np.zeros(shape)
+    encoded_pixels = encoded_pixels.split()
+
+    starts = np.array(encoded_pixels[0::2], dtype=np.int32) - 1
+    lengths = np.array(encoded_pixels[1::2], dtype=int)
+
+    ends = starts + lengths
+
+    mask = np.zeros(shape[0] * shape[1], dtype=np.uint8)
+    for start, end in zip(starts, ends):
+        mask[start:end] = mask_val
+
+    return np.reshape(mask, shape, order='F')
+
+
+def rle_decode_reshape(encoded_pixels, mask_val=1, shape=(1400, 2100)):
+    return rle_decode(encoded_pixels, mask_val, shape).reshape(1, 1400, 2100)
+
+
+def transpose_image(image):
+    if len(image.shape) == 3:
+        return image.transpose(2, 0, 1)
+    else:
+        return image.reshape(1, image.shape[0], image.shape[1])
+
+
+def tensor_to_mask(tensor):
+    return tensor.permute(1, 2, 0).reshape(1400, 2100)
+
+
+def get_image_rle(data, image):
+    image_labels = data[data["Image"] == image]
+
+    fish_rle = rle_decode(image_labels[image_labels["Label"] == "Fish"]["EncodedPixels"].iloc[0])
+    flower_rle = rle_decode(image_labels[image_labels["Label"] == "Flower"]["EncodedPixels"].iloc[0])
+    gravel_rle = rle_decode(image_labels[image_labels["Label"] == "Gravel"]["EncodedPixels"].iloc[0])
+    sugar_rle = rle_decode(image_labels[image_labels["Label"] == "Sugar"]["EncodedPixels"].iloc[0])
+
+    return fish_rle, flower_rle, gravel_rle, sugar_rle
+
+
+def dice_loss(y_true, y_pred):
+    y_pred_thr = y_pred.mean()
+    y_pred_bin = y_pred.clone()
+    y_pred_bin[y_pred_bin >= y_pred_thr] = 1
+    y_pred_bin[y_pred_bin < y_pred_thr] = 0
+    return 1 - ((2 * ((y_true > 0) & (y_pred_bin > 0)).sum()) / ((y_true > 0).sum() + (y_pred_bin > 0).sum()))
