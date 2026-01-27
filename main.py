@@ -27,9 +27,10 @@ print(data[["Label", "EncodedPixels"]].groupby("Label").count())
 images = data["Image"].unique()
 images_train, images_test = train_test_split(images, test_size=0.2, random_state=42)
 ########################################################################################################################
-from cnn_model import EncoderDecoder
+import cnn_model as models
 
-encoder_decoder = EncoderDecoder().to(device)
+encoder_decoder = models.EncoderDecoder().to(device)
+# encoder_decoder = models.EncoderDecoderWithConnections().to(device)
 
 learning_rate = 0.01
 optimizer = Adam(encoder_decoder.parameters(), lr=learning_rate)
@@ -97,7 +98,7 @@ mlflow.config.enable_system_metrics_logging()
 mlflow.config.set_system_metrics_sampling_interval(1)
 
 epochs = 25
-epochs = 50
+# epochs = 50
 packet_size = 2
 # packet_size = 150
 
@@ -171,7 +172,9 @@ with mlflow.start_run() as run:
             break
 
     # Log the final trained model
-    model_info = mlflow.pytorch.log_model(encoder_decoder, name="final_model")
+    model_info = mlflow.pytorch.log_model(encoder_decoder,
+                                          name="final_model",
+                                          registered_model_name=type(encoder_decoder).__name__)
 
 ########################################################################################################################
 range_epochs_ = [i + 1 for i in range(epochs)]

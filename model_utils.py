@@ -4,15 +4,14 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split
-from torch import no_grad, nn
-from cnn_model import build_model_and_optimizer
+from torch import no_grad
 
 
-def train(X, y, model, optimizer, criterion, need_to_learn=True, metric=lambda true, pred: 0):
+def train(X, y, model, optimizer, criterion, need_to_learn=True, metric=lambda true, pred: torch.Tensor(0)):
     """
     Метод 1 прохода обучения модели с backward
 
+    :param metric: функция расчета метрики
     :param X: входные данные
     :param y: ожидаемый выход
     :param model: модель обучения
@@ -43,7 +42,7 @@ def train(X, y, model, optimizer, criterion, need_to_learn=True, metric=lambda t
 
 
 def test_train(X, y, model, optimizer, criterion, num_epochs, batch_size, device, need_learn=True,
-               metric=lambda true, pred: 0, ):
+               metric=lambda true, pred: torch.Tensor(0)):
     """
     Метод обучения модели по эпохам
 
@@ -61,7 +60,8 @@ def test_train(X, y, model, optimizer, criterion, num_epochs, batch_size, device
     avg_metric_loss = None
 
     loss_sum = lambda current, new: (current + new) / 2 if current else new
-
+    loss = 0
+    metric_loss = 0
     for epoch in range(num_epochs):
         if batch_size:
             X_batched = X.split(batch_size).to(device)
