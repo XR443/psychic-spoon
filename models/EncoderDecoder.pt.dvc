@@ -1,0 +1,5 @@
+outs:
+- md5: ba3d927ce6ad05c74ef68273a2950907
+  size: 838973
+  hash: md5
+  path: EncoderDecoder.pt
