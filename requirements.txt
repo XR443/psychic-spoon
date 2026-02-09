@@ -4,29 +4,22 @@ pandas==2.2.3
 matplotlib==3.10.1
 seaborn==0.13.2
 
-scipy==1.15.3
-statsmodels==0.14.4
-scikit-learn==1.7.0
-
 --extra-index-url https://download.pytorch.org/whl/cu130
 torch==2.9.1
 --extra-index-url https://download.pytorch.org/whl/cu130
 torchvision==0.24.1
 
-umap-learn==0.5.9.post2
+transformers[torch]==5.0.0
+datasets==4.5.0
+evaluate==0.4.6
+sentencepiece==0.2.1
 
-networkx==3.4.2
-
-catboost==1.2.8
-lightgbm==4.6.0
-xgboost==3.1.1
+tensorflow==2.20.0
 
 tqdm==4.67.1
-kagglehub==0.3.13
-ipywidgets==8.1.8
-
-opencv-python==4.12.0.88
 
 mlflow==3.8.1
 dvc==3.66.1
 dvc-s3==3.3.0
+
+huggingface_hub==1.4.0
