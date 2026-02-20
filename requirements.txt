@@ -4,11 +4,14 @@ pandas==2.2.3
 matplotlib==3.10.1
 seaborn==0.13.2
 
+scikit-learn==1.8.0
+statsmodels==0.14.6
+statsforecast==2.0.3
+
 --extra-index-url https://download.pytorch.org/whl/cu130
 torch==2.9.1
 --extra-index-url https://download.pytorch.org/whl/cu130
 torchvision==0.24.1
-
 transformers[torch]==5.0.0
 datasets==4.5.0
 evaluate==0.4.6
@@ -23,3 +26,5 @@ dvc==3.66.1
 dvc-s3==3.3.0
 
 huggingface_hub==1.4.0
+
+holidays==0.90
