@@ -1,22 +1,17 @@
-import math
+from datetime import datetime
 
 import mlflow
-import pandas as pd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 from pandas import DataFrame
 from pycocoevalcap.cider.cider import Cider
-from tensorflow.python.keras.backend import in_train_phase
-from torch import Tensor, nn
-from torch.nn.utils.rnn import pad_sequence
+from torch import nn
 from tqdm import tqdm
-from transformers import RobertaTokenizer, AutoTokenizer
+from transformers import AutoTokenizer
 
-from model_utils import get_image, transpose_image, train, get_length_filter, chunked, images_with_target_tokens, \
-    get_batches, prepare_batch, get_log, test, prepare_dataset
+from model_utils import train, get_length_filter, chunked, prepare_batch, get_log, test, prepare_dataset
 from models import ImageCaptionModel
-from datetime import datetime
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

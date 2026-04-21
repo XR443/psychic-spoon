@@ -3,11 +3,8 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import pandas as pd
 import torch
-from pycocoevalcap.cider.cider import Cider
-from sklearn.model_selection import train_test_split
-from torch import no_grad, nn, Tensor
+from torch import nn, Tensor
 from torch.nn.utils.rnn import pad_sequence
 
 
